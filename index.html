@@ -2,192 +2,167 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>崧鹿家 2026 中秋禮盒預購</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>崧鹿家 - 2026中秋預購</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
   <style>
-    body { font-family: 'Noto Sans TC', sans-serif; background-color: #fdfbf7; -webkit-tap-highlight-color: transparent; }
-    .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    body { font-family: 'Helvetica Neue', Arial, 'LiHei Pro', '微軟正黑體', sans-serif; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #fcf8f2; }
+    ::-webkit-scrollbar-thumb { background: #fdba74; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #fb923c; }
   </style>
 </head>
-<body>
+<body class="bg-[#fcf8f2]">
+
   <div id="root"></div>
+
   <script type="text/babel">
-    const { useState, useEffect, useCallback, useMemo } = React;
+    const { useState, useEffect, useMemo } = React;
 
-    // --- 圖示元件 ---
-    const IconCalendar = () => <i data-lucide="calendar" className="w-5 h-5"></i>;
-    const IconUser = () => <i data-lucide="user" className="w-5 h-5"></i>;
-    const IconPhone = () => <i data-lucide="phone" className="w-5 h-5"></i>;
-    const IconMapPin = () => <i data-lucide="map-pin" className="w-5 h-5"></i>;
-    const IconCart = () => <i data-lucide="shopping-bag" className="w-5 h-5"></i>;
-    const IconInfo = () => <i data-lucide="info" className="w-5 h-5"></i>;
-    const IconFileText = () => <i data-lucide="file-text" className="w-5 h-5"></i>;
+    const IconUser = () => <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"></path></svg>;
+    const IconCalendar = () => <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>;
+    const IconCart = () => <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>;
+    const IconMapPin = () => <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.242-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>;
+    const IconCreditCard = () => <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>;
+    const IconFileText = () => <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="20" height="20"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>;
+    const IconInfo = () => <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="18" height="18"><path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>;
+    const IconPlus = () => <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="16" height="16"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"></path></svg>;
+    const IconMinus = () => <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="16" height="16"><path strokeLinecap="round" strokeLinejoin="round" d="M20 12H4"></path></svg>;
+    const IconCheck = () => <svg fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" width="64" height="64"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>;
 
-    // --- 系統設定 ---
     const PRODUCTS = [
-      { id: 'box6', name: '綜合6入禮盒', price: 420, pieces: 6, max: 10 },
-      { id: 'box9', name: '綜合9入禮盒', price: 620, pieces: 9, max: 10 },
-      { id: 'box12', name: '綜合12入禮盒', price: 820, pieces: 12, max: 10, step: 10 }
+      { id: 'box6', name: '6入禮盒', price: 330, desc: '精緻小巧，適合獨享', image: './images/6.jpg' },
+      { id: 'box9', name: '9入禮盒', price: 480, desc: '經典包裝，送禮首選', image: './images/9.jpg' },
+      { id: 'box12', name: '12入禮盒', price: 630, desc: '澎湃大方，家族共享', image: './images/12.jpg' },
     ];
 
     const BANK_INFO = { bankName: '玉山銀行 新湖分行', bankCode: '808', account: '1263-979-047173' };
 
-    // --- 日期產生邏輯 (採用陣列指定法) ---
     const generateValidDates = () => {
-      const allowedDates = [
-        [8, 11], [8, 12], [8, 13], [8, 14], [8, 15],
-        [8, 16], [8, 17], [8, 18], [8, 19], [8, 20], 
-        [8, 21], [8, 22], [8, 25], [8, 26], [8, 27], 
-        [8, 28], [8, 29], [9, 1], [9, 2], [9, 3], 
-        [9, 4], [9, 5], [9, 8], [9, 9], [9, 10], 
-        [9, 11], [9, 12], [9, 15], [9, 16], [9, 17], 
-        [9, 18], [9, 19]
-      ];
-      
-      const days = ['日', '一', '二', '三', '四', '五', '六'];
-      
-      return allowedDates.map(([m, d]) => {
-        const dateObj = new Date(2026, m - 1, d); 
-        const dayOfWeek = dateObj.getDay();
-        return `2026/${String(m).padStart(2, '0')}/${String(d).padStart(2, '0')} (${days[dayOfWeek]})`;
-      });
+      const dates = [];
+      const start = new Date(2026, 7, 18); 
+      const end = new Date(2026, 8, 16);   
+      for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
+        const dayOfWeek = d.getDay();
+        if (dayOfWeek !== 0 && dayOfWeek !== 1) { 
+          const days = ['日', '一', '二', '三', '四', '五', '六'];
+          dates.push(`${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} (${days[dayOfWeek]})`);
+        }
+      }
+      return dates;
     };
     const VALID_DATES = generateValidDates();
 
-    // ⚠️ 這裡請務必填入您最新部署的 Google Apps Script 網址 ⚠️
-    const GOOGLE_SCRIPT_URL = '請替換成您在songlubakery帳號新部署的API網址';
+    const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDm3Y-dX6gaTxJUIgU2p_P-3-O7_fvQfdI3PvAR2IrlagUQrnGBikOvDqUt1Cb-IkNSA/exec';
 
-    const App = () => {
-      useEffect(() => { lucide.createIcons(); });
+    const calculateShipping = (totalBoxes) => {
+      if (totalBoxes === 0) return 0;
+      if (totalBoxes >= 1 && totalBoxes <= 2) return 130;
+      if (totalBoxes >= 3 && totalBoxes <= 10) return 200;
+      if (totalBoxes >= 11 && totalBoxes <= 19) return 250;
+      return 0; 
+    };
 
+    function OrderForm() {
+      const [customer, setCustomer] = useState({ name: '', phone: '09', phoneType: 'mobile', email: '' });
+      const [recipient, setRecipient] = useState({ name: '', phone: '09', phoneType: 'mobile', address: '' });
+      const [sameAsCustomer, setSameAsCustomer] = useState(false);
       const [selectedDate, setSelectedDate] = useState('');
-      const [remainingStock, setRemainingStock] = useState(null);
+      
+      const [cart, setCart] = useState({ box6: 0, box9: 0, box12: 0 });
+      const [remainingStock, setRemainingStock] = useState(null); 
       const [isFetchingStock, setIsFetchingStock] = useState(false);
       const [stockWarning, setStockWarning] = useState('');
       
-      const [cart, setCart] = useState({ box6: 0, box9: 0, box12: 0 });
-      const [formData, setFormData] = useState({ buyerName: '', buyerPhone: '', recipientName: '', recipientPhone: '', recipientAddress: '' });
+      const [modalMessage, setModalMessage] = useState(''); // 自定義提示框訊息
+      
+      const [paymentMethod, setPaymentMethod] = useState('transfer'); 
+      const [payment, setPayment] = useState({ date: '', last5: '' });
       const [notes, setNotes] = useState('');
-      
-      const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0, input: '' });
-      
-      const [modalMessage, setModalMessage] = useState('');
+
       const [isSubmitted, setIsSubmitted] = useState(false);
       const [isSubmitting, setIsSubmitting] = useState(false);
       const [submitError, setSubmitError] = useState('');
 
-      const generateCaptcha = useCallback(() => {
-        const n1 = Math.floor(Math.random() * 9) + 1;
-        const n2 = Math.floor(Math.random() * 9) + 1;
-        setCaptcha({ num1: n1, num2: n2, answer: n1 + n2, input: '' });
-      }, []);
-
-      useEffect(() => {
-        // 網頁載入後直接產生驗證碼
-        generateCaptcha();
-      }, [generateCaptcha]);
-
-      const drawCaptchaCanvas = useCallback(() => {
-        const canvas = document.getElementById('captchaCanvas');
-        if (canvas) {
-          const ctx = canvas.getContext('2d');
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.fillStyle = '#fef3c7'; 
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.font = 'bold 24px "Noto Sans TC", sans-serif';
-          ctx.fillStyle = '#d97706';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText(`${captcha.num1} + ${captcha.num2} = ?`, canvas.width / 2, canvas.height / 2);
-          
-          for(let i = 0; i < 5; i++){
-              ctx.strokeStyle = `rgba(217, 119, 6, ${Math.random() * 0.3})`;
-              ctx.beginPath();
-              ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
-              ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
-              ctx.stroke();
-          }
-        }
-      }, [captcha]);
-
-      useEffect(() => {
-        drawCaptchaCanvas();
-      }, [drawCaptchaCanvas]);
-
       useEffect(() => {
         if (!selectedDate) {
           setRemainingStock(null);
-          setStockWarning('');
           setCart({ box6: 0, box9: 0, box12: 0 });
           return;
         }
-
-        setIsFetchingStock(true);
-        setStockWarning('');
-        
-        fetch(`${GOOGLE_SCRIPT_URL}?date=${encodeURIComponent(selectedDate)}`)
-          .then(res => res.json())
-          .then(data => {
-            if (data.status === 'success') {
-              setRemainingStock(data.remaining);
-              if (data.remaining <= 0) {
-                setStockWarning(`⚠️ ${selectedDate} 已額滿，請選擇其他日期`);
-              } else if (data.remaining < 50) {
-                setStockWarning(`🔥 ${selectedDate} 即將額滿 (剩餘 ${data.remaining} 顆)`);
-              } else {
-                setStockWarning(`✅ ${selectedDate} 庫存充足 (剩餘 ${data.remaining} 顆)`);
-              }
-            } else {
-              setStockWarning('⚠️ 無法取得庫存，請稍後再試');
-              setRemainingStock(null);
+        const fetchStock = async () => {
+          setIsFetchingStock(true);
+          setStockWarning('');
+          try {
+            const response = await fetch(`${GOOGLE_SCRIPT_URL}?date=${encodeURIComponent(selectedDate)}`);
+            const data = await response.json();
+            if (data && typeof data.remainingPieces !== 'undefined') {
+              setRemainingStock(data.remainingPieces);
+              setCart({ box6: 0, box9: 0, box12: 0 }); 
             }
-          })
-          .catch(err => {
-            setStockWarning('⚠️ 伺服器連線錯誤，請檢查網路');
-            setRemainingStock(null);
-          })
-          .finally(() => setIsFetchingStock(false));
+          } catch (error) {
+            console.error('Fetch stock error:', error);
+          } finally {
+            setIsFetchingStock(false);
+          }
+        };
+        fetchStock();
       }, [selectedDate]);
 
-      const updateCart = (productId, delta) => {
+      useEffect(() => {
+        if (sameAsCustomer) {
+          setRecipient(prev => ({ ...prev, name: customer.name, phone: customer.phone, phoneType: customer.phoneType }));
+        } else {
+          setRecipient({ name: '', phone: '09', phoneType: 'mobile', address: '' });
+        }
+      }, [sameAsCustomer, customer.name, customer.phone, customer.phoneType]);
+
+      const orderSummary = useMemo(() => {
+        let totalBoxes = 0;
+        let subtotal = 0;
+        PRODUCTS.forEach(p => {
+          const qty = cart[p.id];
+          totalBoxes += qty;
+          subtotal += (qty * p.price);
+        });
+        const shippingFee = calculateShipping(totalBoxes);
+        return { totalBoxes, subtotal, shippingFee, total: subtotal + shippingFee };
+      }, [cart]);
+
+      const handleQuantityChange = (id, delta) => {
         if (!selectedDate) {
-          setModalMessage('💡 貼心提醒：請先選擇「出貨日期」，才能開始選購商品喔！');
+          setStockWarning('💡 貼心提醒：請先選擇「出貨日期」，才能選擇數量喔！');
           return;
         }
-        if (remainingStock === null || isFetchingStock) return;
-
+        setStockWarning(''); 
+        
         setCart(prev => {
-          const currentQty = prev[productId];
-          const product = PRODUCTS.find(p => p.id === productId);
-          
-          let step = product.step || 1; 
-          let newQty = currentQty + (delta * step);
+          const current = prev[id];
+          const next = current + delta;
+          if (next < 0) return prev;
 
-          if (newQty < 0) newQty = 0;
-          if (newQty > product.max) {
-             setModalMessage(`【${product.name}】每筆訂單限購 ${product.max} 盒。如需大量訂購請分開下單，謝謝！`);
-             return prev;
-          }
+          if (delta > 0 && remainingStock !== null) {
+            let pieceCount = 0;
+            if (id === 'box6') pieceCount = 6;
+            if (id === 'box9') pieceCount = 9;
+            if (id === 'box12') pieceCount = 12;
 
-          const currentTotalPieces = (prev.box6 * 6) + (prev.box9 * 9) + (prev.box12 * 12);
-          const oldProductPieces = currentQty * product.pieces;
-          const newProductPieces = newQty * product.pieces;
-          
-          if (newProductPieces > oldProductPieces) {
-             const addedPieces = newProductPieces - oldProductPieces;
-             if (currentTotalPieces + addedPieces > remainingStock) {
-                 setModalMessage(`⚠️ 抱歉，已達 ${selectedDate} 的訂購總數上限，請調整數量，謝謝！`);
-                 return prev;
-             }
+            const currentTotalPieces = (prev.box6 * 6) + (prev.box9 * 9) + (prev.box12 * 12);
+            
+            if (currentTotalPieces + pieceCount > remainingStock) {
+              const msg = `⚠️ 抱歉，已達 ${selectedDate} 的訂購總數上限，請調整數量，謝謝！`;
+              setStockWarning(msg);
+              setModalMessage(msg); // 觸發彈出提示框
+              return prev; 
+            }
           }
-          return { ...prev, [productId]: newQty };
+          return { ...prev, [id]: next };
         });
       };
 
@@ -200,155 +175,202 @@
       };
 
       const handlePhoneInput = (setter, phoneType) => (e) => {
-        const val = e.target.value.replace(/\D/g, '');
-        setter(prev => ({...prev, [phoneType]: val}));
-      };
-
-      const copySameAsBuyer = () => {
-        if (!formData.buyerName && !formData.buyerPhone) {
-            setModalMessage('請先填寫訂購人資訊喔！');
+        const { name, value } = e.target;
+        
+        if (name === 'phoneType') {
+            if (value === 'mobile') {
+                setter(prev => ({ ...prev, phoneType: value, phone: '09' }));
+            } else {
+                setter(prev => ({ ...prev, phoneType: value, phone: '' }));
+            }
             return;
         }
-        setFormData(prev => ({
-          ...prev,
-          recipientName: prev.buyerName,
-          recipientPhone: prev.buyerPhone
-        }));
+
+        if (name === 'phone' && phoneType === 'mobile') {
+            let val = value.replace(/\D/g, '');
+            if (val.length < 2) {
+                val = '09';
+            } else if (!val.startsWith('09')) {
+                val = '09' + val.substring(2);
+            }
+            if (val.length > 10) val = val.slice(0, 10);
+            
+            let formatted = val;
+            if (val.length > 7) {
+                formatted = val.slice(0, 4) + '-' + val.slice(4, 7) + '-' + val.slice(7);
+            } else if (val.length > 4) {
+                formatted = val.slice(0, 4) + '-' + val.slice(4);
+            }
+            setter(prev => ({ ...prev, phone: formatted }));
+        } else if (name === 'phone' && phoneType === 'landline') {
+            setter(prev => ({ ...prev, phone: value.replace(/[^\d-]/g, '') }));
+        } else {
+            setter(prev => ({ ...prev, [name]: value }));
+        }
       };
 
-      const orderSummary = useMemo(() => {
-        let totalBoxes = cart.box6 + cart.box9 + cart.box12;
-        let subtotal = (cart.box6 * 420) + (cart.box9 * 620) + (cart.box12 * 820);
-        let shippingFee = 0;
-        
-        if (totalBoxes > 0) {
-           if (totalBoxes <= 2) shippingFee = 170;
-           else if (totalBoxes <= 6) shippingFee = 230;
-           else shippingFee = 290; 
-        }
+      const handleInputChange = (setter) => (e) => {
+        const { name, value } = e.target;
+        setter(prev => ({ ...prev, [name]: value }));
+      };
 
-        return { totalBoxes, subtotal, shippingFee, total: subtotal + shippingFee };
-      }, [cart]);
-
-      const handleSubmit = (e) => {
+      const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitError('');
 
-        if (orderSummary.totalBoxes === 0) {
-          setModalMessage('請至少選擇一盒商品喔！');
-          return;
+        if (!selectedDate) { setSubmitError('請選擇出貨日期'); return; }
+        if (orderSummary.totalBoxes === 0) { setSubmitError('請至少選擇一項商品'); return; }
+        
+        if (customer.phoneType === 'mobile') {
+            const rawPhone = customer.phone.replace(/\D/g, '');
+            if (rawPhone.length !== 10 || !rawPhone.startsWith('09')) {
+                 setSubmitError('訂購人手機號碼格式錯誤 (需為09開頭共10碼)');
+                 return;
+            }
         }
-
-        if (parseInt(captcha.input) !== captcha.answer) {
-          setModalMessage('計算題答案不正確，請重新輸入！');
-          generateCaptcha();
-          return;
-        }
-
-        const offshoreKeywords = ['澎湖', '金門', '馬祖', '連江', '綠島', '蘭嶼', '琉球'];
-        const isOffshore = offshoreKeywords.some(keyword => formData.recipientAddress.includes(keyword));
-        if (isOffshore) {
-           setSubmitError('很抱歉，因中秋期間物流繁盛，為確保品質，【離島區域】暫不開放低溫宅配，敬請見諒。');
-           return;
+        
+        if (recipient.phoneType === 'mobile') {
+            const rawPhone = recipient.phone.replace(/\D/g, '');
+            if (rawPhone.length !== 10 || !rawPhone.startsWith('09')) {
+                 setSubmitError('收件人手機號碼格式錯誤 (需為09開頭共10碼)');
+                 return;
+            }
         }
 
         setIsSubmitting(true);
 
-        const orderData = {
-          orderDate: selectedDate,
-          ...formData,
-          ...cart,
-          notes: notes,
-          totalAmount: orderSummary.total
+        const payload = {
+          customerName: customer.name, customerPhone: customer.phone, customerEmail: customer.email,
+          selectedDate, box6: cart.box6, box9: cart.box9, box12: cart.box12,
+          totalBoxes: orderSummary.totalBoxes, subtotal: orderSummary.subtotal,
+          shippingFee: orderSummary.shippingFee, total: orderSummary.total,
+          recipientName: recipient.name, recipientPhone: recipient.phone, recipientAddress: recipient.address,
+          paymentMethod, paymentDate: payment.date,
+          paymentLast5: paymentMethod === 'transfer' ? payment.last5 : '', notes
         };
 
-        fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify(orderData),
-          headers: {
-            'Content-Type': 'text/plain;charset=utf-8',
-          }
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.status === 'success') {
+        try {
+          const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            redirect: 'follow'
+          });
+          const result = await response.json();
+          if (result.result === 'success') {
             setIsSubmitted(true);
           } else {
-            setSubmitError(data.message || '訂單送出失敗，請稍後再試');
-            generateCaptcha();
+            setSubmitError(result.message || '發生未知錯誤');
           }
-        })
-        .catch(err => {
-          setSubmitError('無法連線至伺服器，請檢查網路連線或稍後再試。');
-          generateCaptcha();
-        })
-        .finally(() => setIsSubmitting(false));
+        } catch (error) {
+          setSubmitError('無法連線至伺服器。請檢查網路連線或稍後再試。');
+        } finally {
+          setIsSubmitting(false);
+        }
       };
 
       if (isSubmitted) {
         return (
-          <div className="min-h-screen bg-[#fdfbf7] p-4 md:p-8 flex items-center justify-center">
-            <div className="max-w-xl w-full bg-white rounded-3xl shadow-sm border border-orange-100 p-8 text-center space-y-6 animate-fade-in">
-              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
-              </div>
-              <h1 className="text-2xl font-bold text-gray-800">訂單已成功送出！</h1>
-              <p className="text-gray-600">感謝您的訂購，我們已將訂單明細及匯款資訊寄至您的電子信箱 (<span className="font-semibold text-orange-600">{formData.buyerName}</span> 的信箱，請留意是否在垃圾信件匣)。</p>
-              
-              <div className="bg-orange-50 rounded-2xl p-6 text-left border border-orange-100 my-6">
-                <h3 className="font-bold text-orange-800 mb-3 text-center border-b border-orange-200 pb-2">匯款資訊</h3>
-                <p className="text-sm text-orange-700 mb-1">銀行：{BANK_INFO.bankName} ({BANK_INFO.bankCode})</p>
-                <p className="text-sm text-orange-700 mb-3">帳號：<span className="font-mono text-base tracking-wider">{BANK_INFO.account}</span></p>
-                <p className="text-xs text-orange-600 font-medium">⚠️ 請於訂單成立後 3 日內完成匯款，並回傳後五碼至官方 LINE，逾期將自動取消訂單。</p>
-              </div>
-              <button onClick={() => window.location.reload()} className="bg-orange-500 text-white px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors">返回首頁</button>
+          <div className="min-h-screen bg-orange-50 flex items-center justify-center p-4">
+            <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center">
+              <div className="text-green-500 flex justify-center mb-4"><IconCheck /></div>
+              <h2 className="text-2xl font-bold text-gray-800 mb-2">訂單已送出！</h2>
+              <p className="text-gray-600 mb-6">感謝您的預購，我們已收到您的宅配訂單資訊。</p>
+              <button onClick={() => window.location.reload()} className="bg-orange-500 text-white px-6 py-2 rounded-full font-medium hover:bg-orange-600">返回首頁</button>
             </div>
           </div>
         );
       }
 
       return (
-        <div className="pb-12">
+        <div className="pb-20">
+          {/* 自定義提示彈出框 (Message Box) */}
           {modalMessage && (
             <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-              <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center">
-                <div className="w-16 h-16 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4"><IconInfo /></div>
-                <p className="text-gray-800 font-medium text-lg mb-6 leading-relaxed">{modalMessage}</p>
-                <button onClick={() => setModalMessage('')} className="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors">我知道了</button>
+              <div className="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center transform transition-all">
+                <div className="w-12 h-12 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <IconInfo />
+                </div>
+                <h3 className="text-lg font-bold text-gray-800 mb-2">系統提醒</h3>
+                <p className="text-gray-600 text-sm mb-6 leading-relaxed">{modalMessage}</p>
+                <button 
+                  onClick={() => setModalMessage('')} 
+                  className="w-full bg-orange-500 text-white font-bold py-3 rounded-xl hover:bg-orange-600 transition-colors"
+                >
+                  我知道了
+                </button>
               </div>
             </div>
           )}
 
-          <header className="bg-orange-600 text-white py-8 px-4 text-center shadow-md relative overflow-hidden">
-            <div className="relative z-10 max-w-2xl mx-auto">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-wider mb-2">崧鹿家 2026中秋禮盒</h1>
-              <p className="opacity-90 text-sm md:text-base">純手工製作・低溫宅配・品質堅持</p>
+          <header className="bg-orange-500 text-white py-6 shadow-md rounded-b-[2rem]">
+            <div className="max-w-2xl mx-auto px-4 text-center">
+              <h1 className="text-3xl font-bold tracking-widest mb-1">崧鹿家</h1>
+              <p className="text-white text-xl md:text-2xl font-bold tracking-wide mt-2 drop-shadow-sm">2026中秋預購 - 島鹽蛋黃酥 (宅配專區)</p>
             </div>
           </header>
 
-          <main className="max-w-2xl mx-auto px-4 py-8 -mt-6 relative z-20">
-            <form onSubmit={handleSubmit} className="space-y-6">
+          <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
               
-              {/* 日期選擇 */}
+              {}
               <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
-                <div className="flex items-center gap-2 mb-4 text-orange-600"><IconCalendar /> <h2 className="text-lg font-bold">選擇出貨日期</h2></div>
-                <select required value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full p-4 border border-gray-200 rounded-xl bg-gray-50 text-gray-800 font-medium outline-none focus:ring-2 focus:ring-orange-400 focus:bg-white transition-all appearance-none text-lg">
-                  <option value="" disabled>請點擊選擇日期...</option>
-                  {VALID_DATES.map(date => (
-                    <option key={date} value={date}>{date}</option>
-                  ))}
-                </select>
-                <p className="text-xs text-gray-500 mt-2 ml-1">週日、週一固定公休不發貨。</p>
+                <div className="flex items-center gap-2 mb-4 text-orange-600">
+                  <IconUser /> <h2 className="text-lg font-bold">訂購人資訊</h2>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">姓名 <span className="text-red-500">*</span></label>
+                    <input required type="text" name="name" value={customer.name} onChange={handleInputChange(setCustomer)} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 outline-none" placeholder="請輸入姓名" />
+                  </div>
+                  <div className="grid grid-cols-[100px_1fr] gap-3">
+                      <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">類型</label>
+                          <select name="phoneType" value={customer.phoneType} onChange={handlePhoneInput(setCustomer, customer.phoneType)} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 outline-none bg-white">
+                              <option value="mobile">手機</option>
+                              <option value="landline">市話</option>
+                          </select>
+                      </div>
+                      <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">電話 <span className="text-red-500">*</span></label>
+                          <input 
+                            required 
+                            type="tel" 
+                            name="phone" 
+                            value={customer.phone} 
+                            onChange={handlePhoneInput(setCustomer, customer.phoneType)} 
+                            className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 outline-none" 
+                            placeholder={customer.phoneType === 'mobile' ? '09xx-xxx-xxx' : '02-12345678'} 
+                          />
+                      </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email <span className="text-gray-400 text-xs font-normal">(選填)</span></label>
+                    <input type="email" name="email" value={customer.email} onChange={handleInputChange(setCustomer)} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 outline-none" placeholder="example@email.com" />
+                  </div>
+                </div>
               </section>
 
-              {/* 商品選擇 */}
+              {}
+              <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2 text-orange-600"><IconCalendar /> <h2 className="text-lg font-bold">選擇出貨日期 <span className="text-red-500">*</span></h2></div>
+                  {isFetchingStock && <span className="text-orange-500 text-sm font-medium animate-pulse flex items-center gap-1"><span className="w-2 h-2 bg-orange-500 rounded-full animate-ping"></span> 查詢中...</span>}
+                </div>
+                <p className="text-xs text-gray-500 mb-3 bg-orange-50 p-2 rounded-lg inline-block">* 宅配期間：8/18 - 9/16 (每週日、一不出貨)</p>
+                <select required value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 bg-white">
+                  <option value="" disabled>請選擇日期...</option>
+                  {VALID_DATES.map(date => <option key={date} value={date}>{date}</option>)}
+                </select>
+              </section>
+
+              {}
               <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
                 <div className="flex items-center gap-2 mb-4 text-orange-600"><IconCart /> <h2 className="text-lg font-bold">選擇品項數量</h2></div>
                 {stockWarning && <div className="mb-4 bg-red-50 text-red-600 p-3 rounded-xl border border-red-200 text-sm font-medium flex items-start gap-2"><div className="mt-0.5"><IconInfo /></div> <span>{stockWarning}</span></div>}
                 
                 <div className="space-y-4">
                   {PRODUCTS.map(product => {
-                    let pieceCount = product.id === 'box6' ? 6 : product.id === 'box9' ? 9 : 12 * 10;
+                    let pieceCount = product.id === 'box6' ? 6 : product.id === 'box9' ? 9 : 12;
                     const currentTotalPieces = (cart.box6 * 6) + (cart.box9 * 9) + (cart.box12 * 12);
                     const willExceed = remainingStock !== null && (currentTotalPieces + pieceCount > remainingStock);
                     const isSoldOut = remainingStock !== null && remainingStock < 6; 
@@ -357,18 +379,28 @@
                     
                     return (
                       <div key={product.id} className={`flex items-center justify-between p-4 border rounded-xl transition-colors ${isSoldOut ? 'bg-gray-50 border-gray-200 opacity-70' : 'border-gray-100 hover:border-orange-200 bg-[#fdfbf7]'}`}>
-                        <div>
-                          <h3 className="font-bold text-gray-800 text-lg">{product.name}</h3>
-                          <div className="text-orange-600 font-medium mt-1">NT$ {product.price}</div>
-                          {product.id === 'box12' && <div className="text-xs text-gray-500 mt-1 bg-gray-100 px-2 py-1 rounded-md inline-block">大量專區：每次增加 10 盒</div>}
+                        <div className="flex gap-4 items-center">
+                          <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-orange-100 bg-white relative">
+                            <img src={product.image} alt={product.name} className={`w-full h-full object-cover ${isSoldOut ? 'grayscale' : ''}`} onError={(e) => { e.target.src = `https://placehold.co/100x100/FFF3E0/E65100?text=${product.name.split('入')[0]}%E5%85%A5`; }}/>
+                            {isSoldOut && <div className="absolute inset-0 bg-gray-900/60 flex items-center justify-center text-white text-xs font-bold tracking-widest">今日售完</div>}
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-gray-800">{product.name}</h3>
+                            <p className="text-sm text-gray-500">{product.desc}</p>
+                            <p className="font-semibold text-orange-600 mt-1">NT$ {product.price}</p>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-4 bg-white border border-gray-200 rounded-full px-2 py-1 shadow-sm">
-                          <button type="button" onClick={() => updateCart(product.id, -1)} className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-colors font-bold text-xl active:scale-95" disabled={cart[product.id] === 0}>-</button>
-                          <span className="w-6 text-center font-bold text-gray-800 text-lg">{cart[product.id]}</span>
+                        <div className="flex items-center gap-3 bg-white rounded-full p-1 shadow-sm border border-gray-100">
+                          <button type="button" onClick={() => handleQuantityChange(product.id, -1)} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-orange-100 hover:text-orange-600 disabled:opacity-30" disabled={cart[product.id] === 0 || isDateNotSelected}><IconMinus /></button>
+                          <span className="w-6 text-center font-bold text-gray-800">{cart[product.id]}</span>
+                          
+                          {/* 加號按鈕：如果禁用，點擊時會觸發彈出提示說明 */}
                           {isDisabled ? (
-                             <button type="button" onClick={() => handleDisabledPlusClick(product.name)} className="w-8 h-8 flex items-center justify-center text-gray-300 rounded-full font-bold text-xl cursor-not-allowed">+</button>
+                            <div onClick={() => handleDisabledPlusClick(product.name)} className="cursor-pointer">
+                              <button type="button" className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-300 pointer-events-none" disabled><IconPlus /></button>
+                            </div>
                           ) : (
-                             <button type="button" onClick={() => updateCart(product.id, 1)} className="w-8 h-8 flex items-center justify-center text-orange-500 hover:text-orange-700 hover:bg-orange-50 rounded-full transition-colors font-bold text-xl active:scale-95" disabled={cart[product.id] >= product.max}>+</button>
+                            <button type="button" onClick={() => handleQuantityChange(product.id, 1)} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-600 hover:bg-orange-100 hover:text-orange-600"><IconPlus /></button>
                           )}
                         </div>
                       </div>
@@ -377,79 +409,110 @@
                 </div>
               </section>
 
-              {/* 訂購人與收件人區塊 */}
-              <div className="grid md:grid-cols-2 gap-6">
-                <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
-                  <div className="flex items-center gap-2 mb-4 text-orange-600"><IconUser /> <h2 className="text-lg font-bold">訂購人資訊</h2></div>
-                  <div className="space-y-4">
-                    <div>
+              {}
+              <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2 text-orange-600"><IconMapPin /> <h2 className="text-lg font-bold">收件人資訊</h2></div>
+                  <label className="flex items-center gap-2 text-sm cursor-pointer hover:bg-orange-50 px-2 py-1 rounded-md">
+                    <input type="checkbox" checked={sameAsCustomer} onChange={(e) => setSameAsCustomer(e.target.checked)} className="w-4 h-4 text-orange-500 rounded border-gray-300"/> <span className="text-gray-600">同訂購人</span>
+                  </label>
+                </div>
+                <div className="space-y-4">
+                  <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">姓名 <span className="text-red-500">*</span></label>
-                      <input required type="text" value={formData.buyerName} onChange={e => setFormData({...formData, buyerName: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 focus:bg-white transition-colors" placeholder="真實姓名"/>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">手機號碼 <span className="text-red-500">*</span></label>
-                      <input required type="tel" maxLength="10" value={formData.buyerPhone} onChange={handlePhoneInput(setFormData, 'buyerPhone')} className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 focus:bg-white transition-colors" placeholder="09xxxxxxxx"/>
-                    </div>
+                      <input required type="text" name="name" value={recipient.name} onChange={handleInputChange(setRecipient)} className="w-full p-3 border border-gray-200 rounded-xl outline-none bg-gray-50/50" disabled={sameAsCustomer} />
                   </div>
-                </section>
+                  <div className="grid grid-cols-[100px_1fr] gap-3">
+                      <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">類型</label>
+                          <select name="phoneType" value={recipient.phoneType} onChange={handlePhoneInput(setRecipient, recipient.phoneType)} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-400 outline-none bg-white" disabled={sameAsCustomer}>
+                              <option value="mobile">手機</option>
+                              <option value="landline">市話</option>
+                          </select>
+                      </div>
+                      <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">電話 <span className="text-red-500">*</span></label>
+                          <input 
+                            required 
+                            type="tel" 
+                            name="phone" 
+                            value={recipient.phone} 
+                            onChange={handlePhoneInput(setRecipient, recipient.phoneType)} 
+                            className="w-full p-3 border border-gray-200 rounded-xl outline-none bg-gray-50/50" 
+                            placeholder={recipient.phoneType === 'mobile' ? '09xx-xxx-xxx' : '02-12345678'} 
+                            disabled={sameAsCustomer} 
+                          />
+                      </div>
+                  </div>
+                  <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">地址 <span className="text-red-500">*</span></label>
+                      <input required type="text" name="address" value={recipient.address} onChange={handleInputChange(setRecipient)} className="w-full p-3 border border-gray-200 rounded-xl outline-none" />
+                  </div>
+                </div>
+              </section>
 
-                <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100 relative">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2 text-orange-600"><IconMapPin /> <h2 className="text-lg font-bold">收件人資訊</h2></div>
-                    <button type="button" onClick={copySameAsBuyer} className="text-sm bg-orange-50 text-orange-600 px-3 py-1 rounded-full font-medium hover:bg-orange-100 active:scale-95 transition-all">同訂購人</button>
-                  </div>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">姓名 <span className="text-red-500">*</span></label>
-                      <input required type="text" value={formData.recipientName} onChange={e => setFormData({...formData, recipientName: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 focus:bg-white transition-colors" placeholder="收件人姓名"/>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">手機號碼 <span className="text-red-500">*</span></label>
-                      <input required type="tel" maxLength="10" value={formData.recipientPhone} onChange={handlePhoneInput(setFormData, 'recipientPhone')} className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 focus:bg-white transition-colors" placeholder="09xxxxxxxx"/>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">低溫宅配地址 <span className="text-red-500">*</span></label>
-                      <input required type="text" value={formData.recipientAddress} onChange={e => setFormData({...formData, recipientAddress: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 focus:bg-white transition-colors" placeholder="完整收件地址 (離島暫不配送)"/>
-                    </div>
-                  </div>
-                </section>
+              {}
+              <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 flex gap-3 text-sm text-gray-700">
+                <div className="text-orange-500 mt-0.5"><IconInfo /></div>
+                <div>
+                  <p className="font-bold text-orange-800 mb-1">黑貓宅急便 運費說明</p>
+                  <ul className="list-disc list-inside space-y-0.5 ml-1">
+                    <li>1 ~ 2 盒：運費 130 元</li><li>3 ~ 10 盒：運費 200 元</li><li>11 ~ 19 盒：運費 250 元</li><li className="font-semibold text-red-500">20盒以上免運優惠！</li>
+                  </ul>
+                </div>
               </div>
 
-              {/* 備註 */}
+              <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
+                <div className="flex items-center gap-2 mb-4 text-orange-600"><IconCreditCard /> <h2 className="text-lg font-bold">付款方式</h2></div>
+                <div className="flex gap-4 mb-6">
+                  <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'transfer' ? 'border-orange-500 bg-orange-50 text-orange-700 font-bold' : 'border-gray-200 text-gray-500'}`}><input type="radio" name="paymentMethod" value="transfer" checked={paymentMethod === 'transfer'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />匯款</label>
+                  <label className={`flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'cash' ? 'border-orange-500 bg-orange-50 text-orange-700 font-bold' : 'border-gray-200 text-gray-500'}`}><input type="radio" name="paymentMethod" value="cash" checked={paymentMethod === 'cash'} onChange={(e) => setPaymentMethod(e.target.value)} className="hidden" />到店付現</label>
+                </div>
+                
+                {paymentMethod === 'transfer' && (
+                  <div>
+                    <div className="bg-gray-50 p-4 rounded-xl border border-gray-200 mb-4 font-mono text-sm">
+                      <p>銀行代碼：<span className="font-bold text-lg">{BANK_INFO.bankCode}</span></p>
+                      <p>銀行名稱：{BANK_INFO.bankName}</p>
+                      <p>帳號：<span className="font-bold text-lg text-orange-600">{BANK_INFO.account}</span></p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div><label className="block text-sm font-medium mb-1">預計匯款日 <span className="text-red-500">*</span></label><input required type="date" name="date" value={payment.date} onChange={handleInputChange(setPayment)} className="w-full p-3 border border-gray-200 rounded-xl outline-none" /></div>
+                      <div><label className="block text-sm font-medium mb-1">帳號後五碼 <span className="text-red-500">*</span></label><input required type="text" maxLength={5} name="last5" value={payment.last5} onChange={handleInputChange(setPayment)} className="w-full p-3 border border-gray-200 rounded-xl outline-none" placeholder="12345" /></div>
+                    </div>
+                  </div>
+                )}
+                
+                {paymentMethod === 'cash' && (
+                  <div className="space-y-4">
+                      <div className="text-sm bg-orange-50 p-4 rounded-xl border border-orange-100 flex items-start gap-2">
+                          <div className="text-orange-500 mt-0.5"><IconInfo /></div>
+                          <p>請於約定時間內至店面完成付款，始完成訂單確認。</p>
+                      </div>
+                      <div>
+                          <label className="block text-sm font-medium mb-1">預計到店付款日 <span className="text-red-500">*</span></label>
+                          <input required type="date" name="date" value={payment.date} onChange={handleInputChange(setPayment)} className="w-full p-3 border border-gray-200 rounded-xl outline-none" />
+                      </div>
+                  </div>
+                )}
+              </section>
+
+              {}
               <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
                 <div className="flex items-center gap-2 mb-4 text-orange-600"><IconFileText /> <h2 className="text-lg font-bold">備註留言</h2></div>
-                <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="如有特殊需求，或需要收據、統編、抬頭，請在此填寫" className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 focus:bg-white min-h-[100px]"></textarea>
+                <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="如有特殊需求，或需要收據、統編、抬頭，請在此填寫" className="w-full p-3 border border-gray-200 rounded-xl outline-none min-h-[100px]"></textarea>
               </section>
 
-              {/* 人類驗證 */}
-              <section className="bg-orange-50 p-6 rounded-2xl shadow-sm border border-orange-200">
-                <label className="block text-sm font-bold text-gray-700 mb-3">人類驗證 <span className="text-red-500">*</span></label>
-                <div className="flex gap-4 items-center">
-                  <div className="relative shrink-0 cursor-pointer hover:opacity-90 active:scale-95 transition-transform" onClick={generateCaptcha} title="點擊更換題目">
-                    <canvas id="captchaCanvas" width="120" height="48" className="rounded-xl border border-orange-200 shadow-sm"></canvas>
+              <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 md:relative md:bg-transparent md:border-t-0 md:shadow-none md:p-0">
+                <div className="max-w-2xl mx-auto md:bg-white md:p-6 md:rounded-2xl md:border md:border-orange-100">
+                  {submitError && <div className="mb-4 bg-red-50 text-red-600 p-3 rounded-xl border border-red-200 text-center font-medium text-sm">{submitError}</div>}
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between text-gray-600"><span>商品小計 ({orderSummary.totalBoxes}盒)</span><span>NT$ {orderSummary.subtotal.toLocaleString()}</span></div>
+                    <div className="flex justify-between text-gray-600"><span>運費</span><span>NT$ {orderSummary.shippingFee.toLocaleString()}</span></div>
+                    <div className="flex justify-between items-end border-t border-gray-100 pt-3 mt-3"><span className="font-bold text-gray-800 text-lg">總金額</span><span className="font-bold text-2xl text-orange-600">NT$ {orderSummary.total.toLocaleString()}</span></div>
                   </div>
-                  <input 
-                    required 
-                    type="tel" 
-                    maxLength="2"
-                    value={captcha.input} 
-                    onChange={(e) => setCaptcha(prev => ({...prev, input: e.target.value.replace(/\D/g, '')}))} 
-                    placeholder="請輸入答案" 
-                    className="w-full p-3 border border-orange-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-white font-bold text-lg text-center" 
-                  />
+                  <button type="submit" disabled={isSubmitting} className={`w-full text-white font-bold text-lg py-4 rounded-xl transition-all ${isSubmitting ? 'bg-gray-400' : 'bg-orange-500 hover:bg-orange-600'}`}>{isSubmitting ? '訂單處理中...' : '確認送出訂單'}</button>
                 </div>
-                <p className="text-xs text-orange-600 mt-2 opacity-80">* 為了防止惡意佔用名額，請計算左側圖片中的數字並填入答案，點擊圖片可更換題目。</p>
-              </section>
-
-              {/* 總結 */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100 mt-6">
-                {submitError && <div className="mb-4 bg-red-50 text-red-600 p-3 rounded-xl border border-red-200 text-center font-medium text-sm">{submitError}</div>}
-                <div className="space-y-2 mb-4">
-                  <div className="flex justify-between text-gray-600"><span>商品小計 ({orderSummary.totalBoxes}盒)</span><span>NT$ {orderSummary.subtotal.toLocaleString()}</span></div>
-                  <div className="flex justify-between text-gray-600"><span>運費</span><span>NT$ {orderSummary.shippingFee.toLocaleString()}</span></div>
-                  <div className="flex justify-between items-end border-t border-gray-100 pt-3 mt-3"><span className="font-bold text-gray-800 text-lg">總金額</span><span className="font-bold text-2xl text-orange-600">NT$ {orderSummary.total.toLocaleString()}</span></div>
-                </div>
-                <button type="submit" disabled={isSubmitting} className={`w-full text-white font-bold text-lg py-4 rounded-xl transition-all ${isSubmitting ? 'bg-gray-400' : 'bg-orange-500 hover:bg-orange-600 shadow-md hover:shadow-lg active:scale-[0.98]'}`}>{isSubmitting ? '訂單處理中...' : '確認送出訂單'}</button>
               </div>
             </form>
           </main>
@@ -458,7 +521,7 @@
     }
 
     const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);
+    root.render(<OrderForm />);
   </script>
 </body>
 </html>
