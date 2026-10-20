@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>崧鹿家 2026 中秋禮盒預購</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans TC', sans-serif; background-color: #fdfbf7; -webkit-tap-highlight-color: transparent; }
+    .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useCallback, useMemo } = React;
+
+    // --- 圖示元件 ---
+    const IconCalendar = () => <i data-lucide="calendar" className="w-5 h-5"></i>;
+    const IconUser = () => <i data-lucide="user" className="w-5 h-5"></i>;
+    const IconPhone = () => <i data-lucide="phone" className="w-5 h-5"></i>;
+    const IconMapPin = () => <i data-lucide="map-pin" className="w-5 h-5"></i>;
+    const IconCart = () => <i data-lucide="shopping-bag" className="w-5 h-5"></i>;
+    const IconInfo = () => <i data-lucide="info" className="w-5 h-5"></i>;
+    const IconFileText = () => <i data-lucide="file-text" className="w-5 h-5"></i>;
+
+    // --- 系統設定 ---
+    const PRODUCTS = [
+      { id: 'box6', name: '綜合6入禮盒', price: 420, pieces: 6, max: 10 },
+      { id: 'box9', name: '綜合9入禮盒', price: 620, pieces: 9, max: 10 },
+      { id: 'box12', name: '綜合12入禮盒', price: 820, pieces: 12, max: 10, step: 10 }
+    ];
+
+    const BANK_INFO = { bankName: '玉山銀行 新湖分行', bankCode: '808', account: '1263-979-047173' };
+
+    // --- 日期產生邏輯 (採用陣列指定法) ---
+    const generateValidDates = () => {
+      const allowedDates = [
+        [8, 11], [8, 12], [8, 13], [8, 14], [8, 15],
+        [8, 16], [8, 17], [8, 18], [8, 19], [8, 20], 
+        [8, 21], [8, 22], [8, 25], [8, 26], [8, 27], 
+        [8, 28], [8, 29], [9, 1], [9, 2], [9, 3], 
+        [9, 4], [9, 5], [9, 8], [9, 9], [9, 10], 
+        [9, 11], [9, 12], [9, 15], [9, 16], [9, 17], 
+        [9, 18], [9, 19]
+      ];
+      
+      const days = ['日', '一', '二', '三', '四', '五', '六'];
+      
+      return allowedDates.map(([m, d]) => {
+        const dateObj = new Date(2026, m - 1, d); 
+        const dayOfWeek = dateObj.getDay();
+        return `2026/${String(m).padStart(2, '0')}/${String(d).padStart(2, '0')} (${days[dayOfWeek]})`;
+      });
+    };
+    const VALID_DATES = generateValidDates();
+
+    // ⚠️ 這裡請務必填入您最新部署的 Google Apps Script 網址 ⚠️
+    const GOOGLE_SCRIPT_URL = '請替換成您在songlubakery帳號新部署的API網址';
+
+    const App = () => {
+      useEffect(() => { lucide.createIcons(); });
+
+      const [selectedDate, setSelectedDate] = useState('');
+      const [remainingStock, setRemainingStock] = useState(null);
+      const [isFetchingStock, setIsFetchingStock] = useState(false);
+      const [stockWarning, setStockWarning] = useState('');
+      
+      const [cart, setCart] = useState({ box6: 0, box9: 0, box12: 0 });
+      const [formData, setFormData] = useState({ buyerName: '', buyerPhone: '', recipientName: '', recipientPhone: '', recipientAddress: '' });
+      const [notes, setNotes] = useState('');
+      
+      const [captcha, setCaptcha] = useState({ num1: 0, num2: 0, answer: 0, input: '' });
+      
+      const [modalMessage, setModalMessage] = useState('');
+      const [isSubmitted, setIsSubmitted] = useState(false);
+      const [isSubmitting, setIsSubmitting] = useState(false);
+      const [submitError, setSubmitError] = useState('');
+
+      const generateCaptcha = useCallback(() => {
+        const n1 = Math.floor(Math.random() * 9) + 1;
+        const n2 = Math.floor(Math.random() * 9) + 1;
+        setCaptcha({ num1: n1, num2: n2, answer: n1 + n2, input: '' });
+      }, []);
+
+      useEffect(() => {
+        // 網頁載入後直接產生驗證碼
+        generateCaptcha();
+      }, [generateCaptcha]);
+
+      const drawCaptchaCanvas = useCallback(() => {
+        const canvas = document.getElementById('captchaCanvas');
+        if (canvas) {
+          const ctx = canvas.getContext('2d');
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = '#fef3c7'; 
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.font = 'bold 24px "Noto Sans TC", sans-serif';
+          ctx.fillStyle = '#d97706';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(`${captcha.num1} + ${captcha.num2} = ?`, canvas.width / 2, canvas.height / 2);
+          
+          for(let i = 0; i < 5; i++){
+              ctx.strokeStyle = `rgba(217, 119, 6, ${Math.random() * 0.3})`;
+              ctx.beginPath();
+              ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+              ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+              ctx.stroke();
+          }
+        }
+      }, [captcha]);
+
+      useEffect(() => {
+        drawCaptchaCanvas();
+      }, [drawCaptchaCanvas]);
+
+      useEffect(() => {
+        if (!selectedDate) {
+          setRemainingStock(null);
+          setStockWarning('');
+          setCart({ box6: 0, box9: 0, box12: 0 });
+          return;
+        }
+
+        setIsFetchingStock(true);
+        setStockWarning('');
+        
+        fetch(`${GOOGLE_SCRIPT_URL}?date=${encodeURIComponent(selectedDate)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.status === 'success') {
+              setRemainingStock(data.remaining);
+              if (data.remaining <= 0) {
+                setStockWarning(`⚠️ ${selectedDate} 已額滿，請選擇其他日期`);
+              } else if (data.remaining < 50) {
+                setStockWarning(`🔥 ${selectedDate} 即將額滿 (剩餘 ${data.remaining} 顆)`);
+              } else {
+                setStockWarning(`✅ ${selectedDate} 庫存充足 (剩餘 ${data.remaining} 顆)`);
+              }
+            } else {
+              setStockWarning('⚠️ 無法取得庫存，請稍後再試');
+              setRemainingStock(null);
+            }
+          })
+          .catch(err => {
+            setStockWarning('⚠️ 伺服器連線錯誤，請檢查網路');
+            setRemainingStock(null);
+          })
+          .finally(() => setIsFetchingStock(false));
+      }, [selectedDate]);
+
+      const updateCart = (productId, delta) => {
+        if (!selectedDate) {
+          setModalMessage('💡 貼心提醒：請先選擇「出貨日期」，才能開始選購商品喔！');
+          return;
+        }
+        if (remainingStock === null || isFetchingStock) return;
+
+        setCart(prev => {
+          const currentQty = prev[productId];
+          const product = PRODUCTS.find(p => p.id === productId);
+          
+          let step = product.step || 1; 
+          let newQty = currentQty + (delta * step);
+
+          if (newQty < 0) newQty = 0;
+          if (newQty > product.max) {
+             setModalMessage(`【${product.name}】每筆訂單限購 ${product.max} 盒。如需大量訂購請分開下單，謝謝！`);
+             return prev;
+          }
+
+          const currentTotalPieces = (prev.box6 * 6) + (prev.box9 * 9) + (prev.box12 * 12);
+          const oldProductPieces = currentQty * product.pieces;
+          const newProductPieces = newQty * product.pieces;
+          
+          if (newProductPieces > oldProductPieces) {
+             const addedPieces = newProductPieces - oldProductPieces;
+             if (currentTotalPieces + addedPieces > remainingStock) {
+                 setModalMessage(`⚠️ 抱歉，已達 ${selectedDate} 的訂購總數上限，請調整數量，謝謝！`);
+                 return prev;
+             }
+          }
+          return { ...prev, [productId]: newQty };
+        });
+      };
+
+      const handleDisabledPlusClick = (productName) => {
+        if (!selectedDate) {
+          setModalMessage('💡 貼心提醒：請先選擇「出貨日期」，才能開始選購商品喔！');
+        } else {
+          setModalMessage(`⚠️ 抱歉，已達 ${selectedDate} 的訂購總數上限，請調整數量，謝謝！`);
+        }
+      };
+
+      const handlePhoneInput = (setter, phoneType) => (e) => {
+        const val = e.target.value.replace(/\D/g, '');
+        setter(prev => ({...prev, [phoneType]: val}));
+      };
+
+      const copySameAsBuyer = () => {
+        if (!formData.buyerName && !formData.buyerPhone) {
+            setModalMessage('請先填寫訂購人資訊喔！');
+            return;
+        }
+        setFormData(prev => ({
+          ...prev,
+          recipientName: prev.buyerName,
+          recipientPhone: prev.buyerPhone
+        }));
+      };
+
+      const orderSummary = useMemo(() => {
+        let totalBoxes = cart.box6 + cart.box9 + cart.box12;
+        let subtotal = (cart.box6 * 420) + (cart.box9 * 620) + (cart.box12 * 820);
+        let shippingFee = 0;
+        
+        if (totalBoxes > 0) {
+           if (totalBoxes <= 2) shippingFee = 170;
+           else if (totalBoxes <= 6) shippingFee = 230;
+           else shippingFee = 290; 
+        }
+
+        return { totalBoxes, subtotal, shippingFee, total: subtotal + shippingFee };
+      }, [cart]);
+
+      const handleSubmit = (e) => {
+        e.preventDefault();
+        setSubmitError('');
+
+        if (orderSummary.totalBoxes === 0) {
+          setModalMessage('請至少選擇一盒商品喔！');
+          return;
+        }
+
+        if (parseInt(captcha.input) !== captcha.answer) {
+          setModalMessage('計算題答案不正確，請重新輸入！');
+          generateCaptcha();
+          return;
+        }
+
+        const offshoreKeywords = ['澎湖', '金門', '馬祖', '連江', '綠島', '蘭嶼', '琉球'];
+        const isOffshore = offshoreKeywords.some(keyword => formData.recipientAddress.includes(keyword));
+        if (isOffshore) {
+           setSubmitError('很抱歉，因中秋期間物流繁盛，為確保品質，【離島區域】暫不開放低溫宅配，敬請見諒。');
+           return;
+        }
+
+        setIsSubmitting(true);
+
+        const orderData = {
+          orderDate: selectedDate,
+          ...formData,
+          ...cart,
+          notes: notes,
+          totalAmount: orderSummary.total
+        };
+
+        fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          body: JSON.stringify(orderData),
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+          }
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            setIsSubmitted(true);
+          } else {
+            setSubmitError(data.message || '訂單送出失敗，請稍後再試');
+            generateCaptcha();
+          }
+        })
+        .catch(err => {
+          setSubmitError('無法連線至伺服器，請檢查網路連線或稍後再試。');
+          generateCaptcha();
+        })
+        .finally(() => setIsSubmitting(false));
+      };
+
+      if (isSubmitted) {
+        return (
+          <div className="min-h-screen bg-[#fdfbf7] p-4 md:p-8 flex items-center justify-center">
+            <div className="max-w-xl w-full bg-white rounded-3xl shadow-sm border border-orange-100 p-8 text-center space-y-6 animate-fade-in">
+              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-800">訂單已成功送出！</h1>
+              <p className="text-gray-600">感謝您的訂購，我們已將訂單明細及匯款資訊寄至您的電子信箱 (<span className="font-semibold text-orange-600">{formData.buyerName}</span> 的信箱，請留意是否在垃圾信件匣)。</p>
+              
+              <div className="bg-orange-50 rounded-2xl p-6 text-left border border-orange-100 my-6">
+                <h3 className="font-bold text-orange-800 mb-3 text-center border-b border-orange-200 pb-2">匯款資訊</h3>
+                <p className="text-sm text-orange-700 mb-1">銀行：{BANK_INFO.bankName} ({BANK_INFO.bankCode})</p>
+                <p className="text-sm text-orange-700 mb-3">帳號：<span className="font-mono text-base tracking-wider">{BANK_INFO.account}</span></p>
+                <p className="text-xs text-orange-600 font-medium">⚠️ 請於訂單成立後 3 日內完成匯款，並回傳後五碼至官方 LINE，逾期將自動取消訂單。</p>
+              </div>
+              <button onClick={() => window.location.reload()} className="bg-orange-500 text-white px-6 py-2 rounded-full font-medium hover:bg-orange-600 transition-colors">返回首頁</button>
+            </div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="pb-12">
+          {modalMessage && (
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+              <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl text-center">
+                <div className="w-16 h-16 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4"><IconInfo /></div>
+                <p className="text-gray-800 font-medium text-lg mb-6 leading-relaxed">{modalMessage}</p>
+                <button onClick={() => setModalMessage('')} className="w-full bg-orange-500 text-white py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors">我知道了</button>
+              </div>
+            </div>
+          )}
+
+          <header className="bg-orange-600 text-white py-8 px-4 text-center shadow-md relative overflow-hidden">
+            <div className="relative z-10 max-w-2xl mx-auto">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-wider mb-2">崧鹿家 2026中秋禮盒</h1>
+              <p className="opacity-90 text-sm md:text-base">純手工製作・低溫宅配・品質堅持</p>
+            </div>
+          </header>
+
+          <main className="max-w-2xl mx-auto px-4 py-8 -mt-6 relative z-20">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              
+              {/* 日期選擇 */}
+              <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
+                <div className="flex items-center gap-2 mb-4 text-orange-600"><IconCalendar /> <h2 className="text-lg font-bold">選擇出貨日期</h2></div>
+                <select required value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} className="w-full p-4 border border-gray-200 rounded-xl bg-gray-50 text-gray-800 font-medium outline-none focus:ring-2 focus:ring-orange-400 focus:bg-white transition-all appearance-none text-lg">
+                  <option value="" disabled>請點擊選擇日期...</option>
+                  {VALID_DATES.map(date => (
+                    <option key={date} value={date}>{date}</option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-2 ml-1">週日、週一固定公休不發貨。</p>
+              </section>
+
+              {/* 商品選擇 */}
+              <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
+                <div className="flex items-center gap-2 mb-4 text-orange-600"><IconCart /> <h2 className="text-lg font-bold">選擇品項數量</h2></div>
+                {stockWarning && <div className="mb-4 bg-red-50 text-red-600 p-3 rounded-xl border border-red-200 text-sm font-medium flex items-start gap-2"><div className="mt-0.5"><IconInfo /></div> <span>{stockWarning}</span></div>}
+                
+                <div className="space-y-4">
+                  {PRODUCTS.map(product => {
+                    let pieceCount = product.id === 'box6' ? 6 : product.id === 'box9' ? 9 : 12 * 10;
+                    const currentTotalPieces = (cart.box6 * 6) + (cart.box9 * 9) + (cart.box12 * 12);
+                    const willExceed = remainingStock !== null && (currentTotalPieces + pieceCount > remainingStock);
+                    const isSoldOut = remainingStock !== null && remainingStock < 6; 
+                    const isDateNotSelected = !selectedDate;
+                    const isDisabled = willExceed || isDateNotSelected || isSoldOut || isFetchingStock;
+                    
+                    return (
+                      <div key={product.id} className={`flex items-center justify-between p-4 border rounded-xl transition-colors ${isSoldOut ? 'bg-gray-50 border-gray-200 opacity-70' : 'border-gray-100 hover:border-orange-200 bg-[#fdfbf7]'}`}>
+                        <div>
+                          <h3 className="font-bold text-gray-800 text-lg">{product.name}</h3>
+                          <div className="text-orange-600 font-medium mt-1">NT$ {product.price}</div>
+                          {product.id === 'box12' && <div className="text-xs text-gray-500 mt-1 bg-gray-100 px-2 py-1 rounded-md inline-block">大量專區：每次增加 10 盒</div>}
+                        </div>
+                        <div className="flex items-center gap-4 bg-white border border-gray-200 rounded-full px-2 py-1 shadow-sm">
+                          <button type="button" onClick={() => updateCart(product.id, -1)} className="w-8 h-8 flex items-center justify-center text-gray-500 hover:text-orange-600 hover:bg-orange-50 rounded-full transition-colors font-bold text-xl active:scale-95" disabled={cart[product.id] === 0}>-</button>
+                          <span className="w-6 text-center font-bold text-gray-800 text-lg">{cart[product.id]}</span>
+                          {isDisabled ? (
+                             <button type="button" onClick={() => handleDisabledPlusClick(product.name)} className="w-8 h-8 flex items-center justify-center text-gray-300 rounded-full font-bold text-xl cursor-not-allowed">+</button>
+                          ) : (
+                             <button type="button" onClick={() => updateCart(product.id, 1)} className="w-8 h-8 flex items-center justify-center text-orange-500 hover:text-orange-700 hover:bg-orange-50 rounded-full transition-colors font-bold text-xl active:scale-95" disabled={cart[product.id] >= product.max}>+</button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+
+              {/* 訂購人與收件人區塊 */}
+              <div className="grid md:grid-cols-2 gap-6">
+                <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
+                  <div className="flex items-center gap-2 mb-4 text-orange-600"><IconUser /> <h2 className="text-lg font-bold">訂購人資訊</h2></div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">姓名 <span className="text-red-500">*</span></label>
+                      <input required type="text" value={formData.buyerName} onChange={e => setFormData({...formData, buyerName: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 focus:bg-white transition-colors" placeholder="真實姓名"/>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">手機號碼 <span className="text-red-500">*</span></label>
+                      <input required type="tel" maxLength="10" value={formData.buyerPhone} onChange={handlePhoneInput(setFormData, 'buyerPhone')} className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 focus:bg-white transition-colors" placeholder="09xxxxxxxx"/>
+                    </div>
+                  </div>
+                </section>
+
+                <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100 relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2 text-orange-600"><IconMapPin /> <h2 className="text-lg font-bold">收件人資訊</h2></div>
+                    <button type="button" onClick={copySameAsBuyer} className="text-sm bg-orange-50 text-orange-600 px-3 py-1 rounded-full font-medium hover:bg-orange-100 active:scale-95 transition-all">同訂購人</button>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">姓名 <span className="text-red-500">*</span></label>
+                      <input required type="text" value={formData.recipientName} onChange={e => setFormData({...formData, recipientName: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 focus:bg-white transition-colors" placeholder="收件人姓名"/>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">手機號碼 <span className="text-red-500">*</span></label>
+                      <input required type="tel" maxLength="10" value={formData.recipientPhone} onChange={handlePhoneInput(setFormData, 'recipientPhone')} className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 focus:bg-white transition-colors" placeholder="09xxxxxxxx"/>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">低溫宅配地址 <span className="text-red-500">*</span></label>
+                      <input required type="text" value={formData.recipientAddress} onChange={e => setFormData({...formData, recipientAddress: e.target.value})} className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 focus:bg-white transition-colors" placeholder="完整收件地址 (離島暫不配送)"/>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+              {/* 備註 */}
+              <section className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100">
+                <div className="flex items-center gap-2 mb-4 text-orange-600"><IconFileText /> <h2 className="text-lg font-bold">備註留言</h2></div>
+                <textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="如有特殊需求，或需要收據、統編、抬頭，請在此填寫" className="w-full p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-gray-50 focus:bg-white min-h-[100px]"></textarea>
+              </section>
+
+              {/* 人類驗證 */}
+              <section className="bg-orange-50 p-6 rounded-2xl shadow-sm border border-orange-200">
+                <label className="block text-sm font-bold text-gray-700 mb-3">人類驗證 <span className="text-red-500">*</span></label>
+                <div className="flex gap-4 items-center">
+                  <div className="relative shrink-0 cursor-pointer hover:opacity-90 active:scale-95 transition-transform" onClick={generateCaptcha} title="點擊更換題目">
+                    <canvas id="captchaCanvas" width="120" height="48" className="rounded-xl border border-orange-200 shadow-sm"></canvas>
+                  </div>
+                  <input 
+                    required 
+                    type="tel" 
+                    maxLength="2"
+                    value={captcha.input} 
+                    onChange={(e) => setCaptcha(prev => ({...prev, input: e.target.value.replace(/\D/g, '')}))} 
+                    placeholder="請輸入答案" 
+                    className="w-full p-3 border border-orange-200 rounded-xl outline-none focus:ring-2 focus:ring-orange-400 bg-white font-bold text-lg text-center" 
+                  />
+                </div>
+                <p className="text-xs text-orange-600 mt-2 opacity-80">* 為了防止惡意佔用名額，請計算左側圖片中的數字並填入答案，點擊圖片可更換題目。</p>
+              </section>
+
+              {/* 總結 */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-orange-100 mt-6">
+                {submitError && <div className="mb-4 bg-red-50 text-red-600 p-3 rounded-xl border border-red-200 text-center font-medium text-sm">{submitError}</div>}
+                <div className="space-y-2 mb-4">
+                  <div className="flex justify-between text-gray-600"><span>商品小計 ({orderSummary.totalBoxes}盒)</span><span>NT$ {orderSummary.subtotal.toLocaleString()}</span></div>
+                  <div className="flex justify-between text-gray-600"><span>運費</span><span>NT$ {orderSummary.shippingFee.toLocaleString()}</span></div>
+                  <div className="flex justify-between items-end border-t border-gray-100 pt-3 mt-3"><span className="font-bold text-gray-800 text-lg">總金額</span><span className="font-bold text-2xl text-orange-600">NT$ {orderSummary.total.toLocaleString()}</span></div>
+                </div>
+                <button type="submit" disabled={isSubmitting} className={`w-full text-white font-bold text-lg py-4 rounded-xl transition-all ${isSubmitting ? 'bg-gray-400' : 'bg-orange-500 hover:bg-orange-600 shadow-md hover:shadow-lg active:scale-[0.98]'}`}>{isSubmitting ? '訂單處理中...' : '確認送出訂單'}</button>
+              </div>
+            </form>
+          </main>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>
